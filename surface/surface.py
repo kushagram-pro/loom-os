@@ -34,7 +34,7 @@ _MEMORY    = os.path.join(_LOOM_ROOT, 'memory')
 sys.path.insert(0, _CAPTURE)
 sys.path.insert(0, _MEMORY)
 sys.path.insert(0, _SURFACE)
-sys.path.insert(0, r'C:\loom_deps')
+sys.path.insert(0, r'C:\lp')
 
 from PyQt6.QtWidgets import QApplication
 from PyQt6.QtCore import Qt
