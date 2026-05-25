@@ -1,0 +1,9 @@
+pywin32
+pywinauto
+uiautomation
+pynput
+pyperclip
+watchdog
+aiosqlite
+psutil
+ollama
