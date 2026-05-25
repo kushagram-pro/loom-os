@@ -253,13 +253,12 @@ class LoomBar(QWidget):
         focus_key = make_label("Deep work", C_TEXT_3, 10)
         focus_key.setFixedWidth(120)
 
-        self.focus_bar_lbl = make_label("░░░░░░░░░░", C_TEXT_3, 11)
         self.focus_bar_lbl.setStyleSheet(f"""
-            color: {C_ACCENT};
-            font-family: 'DM Mono', monospace;
-            font-size: 12px;
-            letter-spacing: 2px;
-        """)
+        color: {C_ACCENT};
+        font-family: 'DM Mono', 'Consolas', monospace;
+        font-size: 12px;
+        letter-spacing: 2px;
+    """)
 
         self.focus_time_lbl = make_label("  0m today", C_TEXT_3, 10)
 
