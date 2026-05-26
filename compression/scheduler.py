@@ -45,7 +45,7 @@ sys.path.insert(0, _COMPRESSION)
 from engine import run_compression, init_memory_table, get_recent_memory_nodes
 
 # ── Configuration ──────────────────────────────────────────────────────────
-COMPRESSION_INTERVAL_MINUTES = 30
+COMPRESSION_INTERVAL_MINUTES = 15
 COMPRESSION_INTERVAL_SECONDS = COMPRESSION_INTERVAL_MINUTES * 60
 
 
@@ -138,11 +138,8 @@ async def main():
     run_number = 0
 
     print("[Scheduler] Starting compression loop...")
-    print(f"[Scheduler] First run in 2 minutes (startup delay)\n")
-
-    # Small startup delay — give capture service time to collect
-    # some events before the first compression attempt
-    await asyncio.sleep(120)
+    print(f"[Launcher] First run in 1 minute (startup delay)")
+    await asyncio.sleep(60)
 
     while True:
         run_number += 1

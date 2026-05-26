@@ -55,7 +55,7 @@ from blockers import (
 import aiosqlite
 
 # ── Sync interval ──────────────────────────────────────────────────────────
-SYNC_INTERVAL_MINUTES = 10
+SYNC_INTERVAL_MINUTES = 5
 
 
 # ── Query 1: What have I been working on? ─────────────────────────────────

@@ -135,43 +135,95 @@ def remove_autostart():
         print(f"[Autostart] Could not remove: {e}")
 
 
+# ── Service launcher ───────────────────────────────────────────────────────
+
+def start_capture_service():
+    """
+    Launches capture/main.py as a background subprocess.
+    Output is shown in the same terminal (no separate window).
+    Returns the Popen handle so we can terminate it on exit.
+    """
+    import subprocess
+    capture_script = os.path.join(_LOOM_ROOT, 'capture', 'main.py')
+
+    if not os.path.exists(capture_script):
+        print(f"[Surface] Capture script not found: {capture_script}")
+        return None
+
+    proc = subprocess.Popen(
+        [sys.executable, capture_script],
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        bufsize=1,
+    )
+    print(f"[Capture] Started (PID {proc.pid})")
+    return proc
+
+
+def stream_capture_output(proc):
+    """
+    Forwards capture service stdout to this terminal in a daemon thread.
+    Stops cleanly when the process ends.
+    """
+    import threading
+
+    def _forward():
+        try:
+            for line in proc.stdout:
+                print(line, end='', flush=True)
+        except Exception:
+            pass
+
+    t = threading.Thread(target=_forward, daemon=True, name="capture-log")
+    t.start()
+
+
 # ── Main ───────────────────────────────────────────────────────────────────
 
 def main():
     print()
     print("  ╔══════════════════════════════════════════════╗")
     print("  ║       L · O · O · M                         ║")
-    print("  ║       Surface Layer                          ║")
     print("  ║       Living Overlay Of Memory               ║")
     print("  ╚══════════════════════════════════════════════╝")
     print()
-
-    # Register auto-start (only runs once, checks if already registered)
-    install_autostart()
-
-    # Create Qt application
-    app = QApplication(sys.argv)
-    app.setQuitOnLastWindowClosed(False)  # Keep running even if bar is hidden
-
-    # Check system tray is available
-    if not hasattr(app, 'screenAt'):
-        print("[Surface] Warning: system tray may not be available")
-
-    # Create the Loom Bar
-    bar = LoomBar()
-    bar.show()
-
-    # Create the system tray icon
-    tray = LoomTray(bar)
-
-    print("[Surface] Loom Bar is running")
-    print("[Surface] Look for the bar at the top of your screen")
-    print("[Surface] Right-click the tray icon for options")
-    print("[Surface] Press Ctrl+C here or use tray menu to quit")
+    print("  Services started by this process:")
+    print("    capture/main.py       — event capture (subprocess)")
+    print("    surface/bar.py        — compression + memory sync (thread)")
     print()
 
-    # Run the Qt event loop
-    sys.exit(app.exec())
+    # ── Start capture service ───────────────────────────────────────────────
+    capture_proc = start_capture_service()
+    if capture_proc:
+        stream_capture_output(capture_proc)
+
+    # ── Register Windows auto-start (once only) ─────────────────────────────
+    install_autostart()
+
+    # ── Qt application ──────────────────────────────────────────────────────
+    app = QApplication(sys.argv)
+    app.setQuitOnLastWindowClosed(False)
+
+    bar  = LoomBar()
+    bar.show()
+    tray = LoomTray(bar)
+
+    print("[Surface] Loom Bar is running — look for the bar at the top of your screen")
+    print("[Surface] Right-click the tray icon to quit")
+    print()
+
+    try:
+        sys.exit(app.exec())
+    finally:
+        # Clean up capture service when bar exits
+        if capture_proc and capture_proc.poll() is None:
+            print("[Surface] Stopping capture service…")
+            capture_proc.terminate()
+            try:
+                capture_proc.wait(timeout=5)
+            except Exception:
+                capture_proc.kill()
 
 
 if __name__ == "__main__":

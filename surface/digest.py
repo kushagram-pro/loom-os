@@ -164,9 +164,9 @@ async def generate_digest() -> DigestData:
         if row:
             last_node_time = datetime.fromisoformat(row[0])
             elapsed_mins   = (datetime.now() - last_node_time).total_seconds() / 60
-            d.mins_to_next_sync = max(0, int(30 - elapsed_mins))
+            d.mins_to_next_sync = max(0, int(15 - elapsed_mins))
         else:
-            d.mins_to_next_sync = 30
+            d.mins_to_next_sync = 15
 
         # ── Projects ──────────────────────────────────────────────────────
         try:
