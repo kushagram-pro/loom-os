@@ -1,0 +1,23 @@
+# Local database — never commit
+data/
+*.db
+*.db-shm
+*.db-wal
+
+# LanceDB vector store
+loom_vectors/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Secrets
+.env
+*.key
