@@ -175,12 +175,23 @@ async def generate_digest() -> DigestData:
             ) as cur:
                 d.projects_detected = (await cur.fetchone())[0]
 
+            # Prefer multi-session projects — a single-session recent node
+            # (like an isolated debugging session) shouldn't overshadow the
+            # main project with 6+ sessions.
             async with db.execute(
                 '''SELECT name, session_count FROM projects
-                   WHERE is_stale = 0
+                   WHERE is_stale = 0 AND session_count > 1
                    ORDER BY last_active DESC LIMIT 1'''
             ) as cur:
                 row = await cur.fetchone()
+            if not row:
+                # Fallback: any project if all are single-session
+                async with db.execute(
+                    '''SELECT name, session_count FROM projects
+                       WHERE is_stale = 0
+                       ORDER BY last_active DESC LIMIT 1'''
+                ) as cur:
+                    row = await cur.fetchone()
             if row:
                 d.current_project  = row[0]
                 d.project_sessions = row[1]
